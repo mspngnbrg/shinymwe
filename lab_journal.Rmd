@@ -1,0 +1,25 @@
+---
+title: "Documentation"
+output: html_notebook
+---
+
+# Here we produce a minimal working example. 
+
+1. First, we collect a question and three answers.
+
+2. Then, we create a multiple choice quiz and collect the answers.
+
+3. We bring question and answers together. 
+
+# 2022-03-26 
+questions and right and wrong answers are collected and saved as .csv in folder (solved)
+folder name created with date (solved)
+
+Each question needs an input_id (solved) to link questions and multiple-choice answers later ()
+
+Aggregate answers and account for all possible answers ()
+
+Visualize results () 
+
+
+
