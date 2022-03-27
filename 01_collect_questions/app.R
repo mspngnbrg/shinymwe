@@ -1,13 +1,17 @@
 # collect questions
-# students invent 1 question and 3 potential answers
-
-# collect questions
+# students invent 1 question and 3 potential answers (a "set")
+# "sets" are stored in dropbox folder
 
 library(shiny)
 
 library(rdrop2)
-outputDir <- "questions_1" # paste0("../questions_", Sys.Date())
-# if(!file.exists(outputDir)) dir.create(outputDir)
+
+token <- readRDS("../Rmd/droptoken.rds")
+# Then pass the token to each drop_ function
+drop_acc(dtoken = token)
+
+
+outputDir <- "questions_1"
 
 saveData <- function(data) {
 
@@ -35,7 +39,7 @@ shinyApp(
         textInput("a1", "Answer 1", ""),
         textInput("a2", "Answer 2", ""),
         textInput("a3", "Answer 3", ""), # modify if 4 answers are needed
-        actionButton("submit", "Submit"),
+        actionButton("submit", "Submit, all answers MUST differ!"),
                      textOutput("Please click")
     ),
     server = function(input, output, session) {
@@ -43,6 +47,7 @@ shinyApp(
         # Whenever a field is filled, aggregate all form data
         formData <- reactive({
             data <- sapply(fields, function(x) input[[x]])
+            # TODO: check that no answers are doublettes
             tibble <- tibble::tibble(question = data[1],
                                      option = data[2:4],
                                      input_type = "mc",
@@ -57,7 +62,7 @@ shinyApp(
         observeEvent(input$submit, {
             saveData(formData())
             updateActionButton(session, "submit",
-                               label = "Thanks, you submitted a question! You can submit another one as you wish... ")
+                               label = "Thanks, you submitted a question! Submit another one if you wish... ")
 
         })
     }

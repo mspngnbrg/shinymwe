@@ -1,0 +1,69 @@
+---
+title: "test data displaying"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+library(rdrop2)
+library(ggplot2)
+token <- readRDS("../Rmd/droptoken.rds")
+# Then pass the token to each drop_ function
+drop_acc(dtoken = token)
+
+# load questions (teachers file)
+inputQ <- "questions_1_teacher"
+inputA <- "answers_1"
+loadData <- function(inDir) {
+  inputDir <- inDir
+    # Read all the files into a list
+    filesInfo <- drop_dir(inputDir)
+    filePaths <- filesInfo$path_display
+    data <- lapply(filePaths, drop_read_csv, stringsAsFactors = FALSE)
+    # Concatenate all data together into one data.frame
+    data <- do.call(rbind, data)
+    # assign input ids
+    n_questions <- unique(data$question)
+    for(i in 1:length(data$input_id)){
+        data$input_id[i] <- paste0("id_", which(n_questions == data$question[i]) )
+    }
+    return(data)
+}
+
+# load questions (teacher version) and answers from start of day 2
+questions <- loadData(inputQ)
+answers <- loadData(inputA)
+
+# vote count per answer option
+answer_summary <- answers %>% group_by(question_id, response) %>%
+  summarize(counts = n())
+
+names(answer_summary)[2] <- "option"
+
+teacher_results <- merge(questions, answer_summary, all.x = TRUE)
+
+teacher_results$counts[is.na(teacher_results$counts)] <- 0
+
+teacher_results <- teacher_results %>% select(question, option, counts)
+
+# TODO `%>%` <- magrittr::`%>%` 
+
+# give answers number 1:n for plotting 
+x <- teacher_results %>% group_by(question) %>% 
+  mutate(percent = counts / sum (counts) * 100,
+         answer_id = 1:length(question) ) 
+
+# Question subset
+# ===============
+unique <- unique(x$question)[1]
+x <- x %>%
+  filter(question == unique) 
+
+plot(ggplot(x, aes(x = answer_id, y = percent))+
+       geom_bar(stat = "identity")+
+       theme_classic(base_size = 16)+
+       ylim(0, 100)+
+       ylab("%"))
+
+```
+
