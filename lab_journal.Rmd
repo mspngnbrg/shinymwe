@@ -5,15 +5,27 @@ output: html_notebook
 
 # Here we produce a minimal working example. 
 
-1. First, we collect a question and three answers.
+collect a set of i) question, ii) one correct answer and ii) additional wrong answers from students.
 
-2. Then, we create a multiple choice quiz and collect the answers.
+aggregate sets as teacher file for curating. removal of double questions, typo corrections, question clarification.
 
-3. We bring question and answers together. 
+create multiple choice quiz from teacher file, publish and collect the student responses.
+
+visualize sets and responses / publish? 
+
+# 2022-03-27
+<!-- console/locally
+
+install.packages('rsconnect') 
+
+rsconnect::setAccountInfo(name='mspangenberg',
+			  token='3E88C610D318079AB06EF49FDBC1C3DE',
+			  secret='<SECRET>')
+
+--> 
 
 # 2022-03-26 
-questions and right and wrong answers are collected and saved as .csv in folder (solved)
-folder name created with date (solved)
+questions and right and wrong answers are collected and saved as .csv in dropbox folder (solved)
 
 Each question needs an input_id (solved) to link questions and multiple-choice answers later ()
 

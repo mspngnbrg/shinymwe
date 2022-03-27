@@ -1,20 +1,27 @@
 # collect questions
 # students invent 1 question and 3 potential answers
 
+# collect questions
+
 library(shiny)
-outputDir <- paste0("../questions_", Sys.Date())
-if(!file.exists(outputDir)) dir.create(outputDir)
+
+library(rdrop2)
+outputDir <- "questions_1" # paste0("../questions_", Sys.Date())
+# if(!file.exists(outputDir)) dir.create(outputDir)
 
 saveData <- function(data) {
 
     # Create a unique file name
     fileName <- sprintf("%s_%s.csv", as.integer(Sys.time()), digest::digest(data))
-    # Write the file to the local system
+
+    # Write the data to a temporary file locally & upload to dropbox
+    filePath <- file.path(tempdir(), fileName)
     write.csv(
         x = data,
-        file = file.path(outputDir, fileName),
-        row.names = FALSE, quote = TRUE
-    )
+        file = filePath,
+        row.names = FALSE, quote = TRUE)
+
+     drop_upload(filePath, path = outputDir)
 }
 
 # Define the fields we want to save from the form
@@ -28,7 +35,8 @@ shinyApp(
         textInput("a1", "Answer 1", ""),
         textInput("a2", "Answer 2", ""),
         textInput("a3", "Answer 3", ""), # modify if 4 answers are needed
-        actionButton("submit", "Submit")
+        actionButton("submit", "Submit"),
+                     textOutput("Please click")
     ),
     server = function(input, output, session) {
 
@@ -38,7 +46,7 @@ shinyApp(
             tibble <- tibble::tibble(question = data[1],
                                      option = data[2:4],
                                      input_type = "mc",
-                                     input_id = "42dada",
+                                     input_id = "id",
                                      dependence = NA,
                                      dependence_value = NA,
                                      required = TRUE) # modify if 4 answers are needed
@@ -48,6 +56,9 @@ shinyApp(
         # When the Submit button is clicked, save the form data
         observeEvent(input$submit, {
             saveData(formData())
+            updateActionButton(session, "submit",
+                               label = "Thanks, you submitted a question! You can submit another one as you wish... ")
+
         })
     }
 )

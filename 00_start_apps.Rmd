@@ -1,0 +1,11 @@
+---
+title: "Start/publish apps on shiny.io"
+output: html_notebook
+---
+
+
+
+```{r}
+# rsconnect::deployApp('01_collect_questions', account = "mspangenberg")
+```
+
