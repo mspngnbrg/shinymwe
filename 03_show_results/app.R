@@ -45,6 +45,8 @@ teacher_results$counts[is.na(teacher_results$counts)] <- 0
 
 teacher_results <- teacher_results %>% select(question_id, question, option, counts)
 
+print(teacher_results)
+
 # TODO `%>%` <- magrittr::`%>%`
 
 # give answers number 1:n for plotting
@@ -97,7 +99,7 @@ server <- function(input, output) {
         x <- x %>%
             filter(question_id == input$response)
 
-        paste0(with(x,
+        paste0("1", with(x,
                     option[answer_id == "1"]))
     })
 
@@ -105,7 +107,7 @@ server <- function(input, output) {
         x <- x %>%
             filter(question_id == input$response)
 
-        paste0(with(x,
+        paste0("2", with(x,
                     option[answer_id == "2"]))
     })
 
@@ -113,7 +115,7 @@ server <- function(input, output) {
         x <- x %>%
             filter(question_id == input$response)
 
-        paste0(with(x,
+        paste0("3",with(x,
                     option[answer_id == "3"]))
     })
 
