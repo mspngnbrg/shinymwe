@@ -13,18 +13,29 @@ create multiple choice quiz from teacher file, publish and collect the student r
 
 visualize sets and responses / publish? 
 
-# 2022-03-27
-How to set up dropbox remote access:
- 
-<!-- console/locally
+# 2022-03-28
+We implemented a local work flow for quicker development and testing.
+Q&A sets, the teacher files derived from them, and Q answers are now collected in project folders. 
+What I learned today was that answers should not be numeric, because later in the pipeline things crash when .csv files get aggregated. 
 
-install.packages('rsconnect') 
+Future ideas for the development. 
+Open source development is preferred, but it is unclear whether non--coders can setup RStudio, a Shiny app and Dropbox and make the needed connection between these three parts. 
+For example, Shiny needs a writing permission for the Dropbox folder.
+In theory, all could happen within one Shiny session with multiple pages, but still data could not be saved from the session. 
 
-rsconnect::setAccountInfo(name='mspangenberg',
-			  token='3E88C610D318079AB06EF49FDBC1C3DE',
-			  secret='<SECRET>')
+Key features that I would like:
 
---> 
+Produce a permanent Q&A sets (in combination with votes?) for future students. The Q&A set is already stored as a singe .csv file, and a file including the votes could also easily be safed.
+
+My most favorite work flow: 
+Teachers log in to a website. They click a button "create question collection", and the question collection starts either i) immediately and runs for some time (e.g. a day) or at a ii) fixed staring and ending date:time. If the time is over, the teacher gets an notification like "question collection completed, xx contribution, please curate the data".
+She logs in to the website again and clicks "curate finished Q&A sets". Q&As are listed, and i) each question can be clicked and is removed. ii) Q&A text is clickable for quick correction of typos. 
+After data curating, she clicks a button "publish quiz", again either immediately or at a given time.
+At any time the quiz can be stopped.
+
+Now, she can click: show results, and each Q&A set, as well as barplots displaying how many votes each answer got are shown. In the best case, the bar color for the correct answer is green, and the wrong ones in another colorblind-friendly color (not red). 
+
+
 
 # 2022-03-26 
 questions and right and wrong answers are collected and saved as .csv in dropbox folder (solved)
