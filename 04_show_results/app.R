@@ -1,4 +1,5 @@
 # show results
+# ============
 
 # merge questions and new answer from next class
 
@@ -6,53 +7,55 @@ library(dplyr)
 library(rdrop2)
 library(ggplot2)
 
-token <- readRDS("../Rmd/droptoken.rds")
-# Then pass the token to each drop_ function
-drop_acc(dtoken = token)
+run_locally <- TRUE # FALSE uses Dropbox
 
 # load questions (teachers file)
 inputQ <- "questions_1_teacher"
 inputA <- "answers_1"
-loadData <- function(inDir) {
+
+loadData <- function(inDir){
+
+    # load and aggregate all answers
     inputDir <- inDir
-    # Read all the files into a list
-    filesInfo <- drop_dir(inputDir)
-    filePaths <- filesInfo$path_display
-    data <- lapply(filePaths, drop_read_csv, stringsAsFactors = FALSE)
-    # Concatenate all data together into one data.frame
-    data <- do.call(rbind, data)
-    # assign input ids
-    n_questions <- unique(data$question)
-    for(i in 1:length(data$input_id)){
-        data$input_id[i] <- paste0("id_", which(n_questions == data$question[i]) )
+
+    if(run_locally){
+        localDir <- paste0("../local", inputDir, "/")
+        data <- list.files(path =localDir, pattern = "*.csv", full.names = TRUE, recursive = TRUE) %>%
+            purrr::map(readr::read_csv) %>%
+            bind_rows()
+    } else {
+        # Dropbox
+        filesInfo <- drop_dir(inputDir)
+        filePaths <- filesInfo$path_display
+        data <- lapply(filePaths, drop_read_csv, stringsAsFactors = FALSE)
+        data <- do.call(rbind, data)
     }
-    return(data)
+    data
 }
 
-# load questions (teacher version) and answers from start of day 2
-questions <- loadData(inputQ)
-answers <- loadData(inputA)
-
+(questions <- loadData(inputQ))
+(answers <- loadData(inputA))
+names(answers)[names(answers) == "question_id"] <- "input_id"
 # vote count per answer option
-answer_summary <- answers %>% group_by(question_id, response) %>%
+answer_summary <- answers %>% group_by(input_id, response) %>%
     summarize(counts = n())
 
 names(answer_summary)[2] <- "option"
 
-teacher_results <- merge(questions, answer_summary, all.x = TRUE)
+(teacher_results <- merge(questions, answer_summary, all.x = TRUE))
 
-teacher_results$counts[is.na(teacher_results$counts)] <- 0
-
-teacher_results <- teacher_results %>% select(question_id, question, option, counts)
+(teacher_results$counts[is.na(teacher_results$counts)] <- 0)
+teacher_results
+teacher_results <- teacher_results %>% select(input_id, question, option, counts)
 
 print(teacher_results)
 
 # TODO `%>%` <- magrittr::`%>%`
 
 # give answers number 1:n for plotting
-x <- teacher_results %>% group_by(question_id) %>%
+x <- teacher_results %>% group_by(input_id) %>%
     mutate(percent = counts / sum (counts) * 100,
-           answer_id = 1:length(question_id) )
+           answer_id = 1:length(input_id) )
 
 # sort by answer IDs, make them a factor
 x$answer_id <- factor(x$answer_id)
@@ -70,7 +73,7 @@ ui <- fluidPage(
             # Sidebar for user choices
 
             selectInput("response", "Questions",
-                        unique(x$question_id)
+                        unique(x$input_id)
             ),
         ),
 
@@ -90,33 +93,33 @@ server <- function(input, output) {
 
     output$question_text <-  renderText({
         x <- x %>%
-            filter(question_id == input$response)
+            filter(input_id == input$response)
 
         paste0(x$question[1])
     })
 
     output$a1_text <-  renderText({
         x <- x %>%
-            filter(question_id == input$response)
+            filter(input_id == input$response)
 
-        paste0("1", with(x,
-                    option[answer_id == "1"]))
+        paste0("1: ", with(x,
+                         option[answer_id == "1"]))
     })
 
     output$a2_text <-  renderText({
         x <- x %>%
-            filter(question_id == input$response)
+            filter(input_id == input$response)
 
-        paste0("2", with(x,
-                    option[answer_id == "2"]))
+        paste0("2: ", with(x,
+                         option[answer_id == "2"]))
     })
 
     output$a3_text <-  renderText({
         x <- x %>%
-            filter(question_id == input$response)
+            filter(input_id == input$response)
 
-        paste0("3",with(x,
-                    option[answer_id == "3"]))
+        paste0("3: ", with(x,
+                        option[answer_id == "3"]))
     })
 
 
@@ -130,7 +133,7 @@ server <- function(input, output) {
     output$resPlot <- renderPlot({
 
         x <- x %>%
-            filter(question_id == input$response)
+            filter(input_id == input$response)
 
         plot(ggplot(x, aes(x = answer_id, y = percent))+
                  geom_bar(stat = "identity")+

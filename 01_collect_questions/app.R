@@ -1,31 +1,47 @@
 # collect questions
-# students invent 1 question and 3 potential answers (a "set")
-# "sets" are stored in dropbox folder
+# =================
+# students submit 1 question and 3 potential answers (a "set")
+# "sets" are stored in dropbox folder or in a local file (for testing)
 
 library(shiny)
-
 library(rdrop2)
 
-token <- readRDS("../Rmd/droptoken.rds")
-# Then pass the token to each drop_ function
-drop_acc(dtoken = token)
+`%>%` <- magrittr::`%>%`
 
+run_locally <- TRUE # FALSE uses Dropbox
 
 outputDir <- "questions_1"
+
+# DANGER AREA! DELETES OLD DATA IF TRUE!
+delete_old_data <- TRUE
+if(delete_old_data) unlink(paste0("../local", outputDir, "/"))
 
 saveData <- function(data) {
 
     # Create a unique file name
     fileName <- sprintf("%s_%s.csv", as.integer(Sys.time()), digest::digest(data))
 
-    # Write the data to a temporary file locally & upload to dropbox
-    filePath <- file.path(tempdir(), fileName)
-    write.csv(
-        x = data,
-        file = filePath,
-        row.names = FALSE, quote = TRUE)
+    if(run_locally){
+        # save locally
+        localDir <- paste0("../local", outputDir, "/")
+        if(!dir.exists( localDir)) dir.create(localDir)
 
-     drop_upload(filePath, path = outputDir)
+        write.csv(
+            x = data,
+            file = paste0(localDir, fileName),
+            row.names = FALSE, quote = TRUE)
+    } else {
+        # Dropbox
+        # Write the data to a temporary file locally & upload to dropbox
+        filePath <- file.path(tempdir(), fileName)
+
+        write.csv(
+            x = data,
+            file = filePath,
+            row.names = FALSE, quote = TRUE)
+
+        drop_upload(filePath, path = outputDir)
+    }
 }
 
 # Define the fields we want to save from the form
@@ -40,7 +56,7 @@ shinyApp(
         textInput("a2", "Answer 2", ""),
         textInput("a3", "Answer 3", ""), # modify if 4 answers are needed
         actionButton("submit", "Submit, all answers MUST differ!"),
-                     textOutput("Please click")
+        textOutput("Please click")
     ),
     server = function(input, output, session) {
 
@@ -55,15 +71,14 @@ shinyApp(
                                      dependence = NA,
                                      dependence_value = NA,
                                      required = TRUE) # modify if 4 answers are needed
-            data <- tibble
+            data <- tibble %>% mutate(across(everything(), as.character)) # numbers in text fields will crash otherwise
         })
 
         # When the Submit button is clicked, save the form data
         observeEvent(input$submit, {
             saveData(formData())
             updateActionButton(session, "submit",
-                               label = "Thanks, you submitted a question! Submit another one if you wish... ")
-
+                               label = "Thanks! Submit another one? ")
         })
     }
 )

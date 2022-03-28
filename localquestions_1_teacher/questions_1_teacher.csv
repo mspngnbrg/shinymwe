@@ -1,0 +1,7 @@
+"question","option","input_type","input_id","dependence","dependence_value","required"
+"How much?","qwe","mc","id_1",NA,NA,TRUE
+"How much?","er","mc","id_1",NA,NA,TRUE
+"How much?","dfhgdf","mc","id_1",NA,NA,TRUE
+"How much not?","qwesw","mc","id_2",NA,NA,TRUE
+"How much not?","eraqw","mc","id_2",NA,NA,TRUE
+"How much not?","dfhgdfad","mc","id_2",NA,NA,TRUE
