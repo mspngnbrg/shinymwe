@@ -23,9 +23,9 @@ for(INDEX in 1:length(folder_names)) {
 # define input and output folders for the whole project 
 # and copy this file into each app folder 
 # =====================================================
-d <- data.frame(questions_raw = "A_questions_1",
-                questions_teacher = "A_teacher_1",
-                answers_raw = "A_answers_1")
+d <- data.frame(questions_raw = "000_questions_1",
+                questions_teacher = "000_teacher_1",
+                answers_raw = "000_answers_1")
 saveRDS(d, "folder_names.rds")
 
 for(INDEX in 1:length(folder_names)) {
