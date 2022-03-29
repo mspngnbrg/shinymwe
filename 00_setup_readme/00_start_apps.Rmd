@@ -1,0 +1,45 @@
+---
+title: "Start/publish apps on shiny.io"
+output: html_notebook
+---
+
+
+
+```{r}
+# create your own dropbox token if needed (only once)
+# ===================================================
+library(rdrop2)
+drop_auth()
+
+# copy .httr-auth into all app folders
+folder_names <- c("../01_collect_questions", "../02_question_curation", 
+                  "../03_start_quiz", "../04_show_results")
+
+for(INDEX in 1:length(folder_names)) {
+  file.copy(list.files(getwd(), ".httr-oauth", all.files = TRUE), 
+            folder_names[INDEX], overwrite = TRUE)
+}
+
+# define input and output folders for the whole project 
+# and copy this file into each app folder 
+# =====================================================
+d <- data.frame(questions_raw = "A_questions_1",
+                questions_teacher = "A_teacher_1",
+                answers_raw = "A_answers_1")
+saveRDS(d, "folder_names.rds")
+
+for(INDEX in 1:length(folder_names)) {
+  temp_folder_name <- paste0(folder_names[INDEX], "/data")
+  if(!dir.exists(temp_folder_name)) dir.create(temp_folder_name)
+file.copy(list.files(getwd(), "folder_names.rds", all.files = TRUE), temp_folder_name , overwrite = TRUE) 
+}
+
+# start one app from this script by removing "#" (or select all text after "#" and hit "Enter") 
+
+# rsconnect::deployApp('../01_collect_questions/', account = "mspangenberg")
+# rsconnect::deployApp('02_question_curation/', account = "mspangenberg")
+# rsconnect::deployApp('03_start_quiz/', account = "mspangenberg")
+# rsconnect::deployApp('04_show_results/', account = "mspangenberg")
+# rsconnect::deployApp('blaa/', account = "mspangenberg")
+```
+

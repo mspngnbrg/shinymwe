@@ -1,0 +1,11 @@
+name: 04_show_results
+title:
+username:
+account: mspangenberg
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5962207
+bundleId: 5740656
+url: https://mspangenberg.shinyapps.io/04_show_results/
+when: 1648565277.53146
+lastSyncTime: 1648565277.53148

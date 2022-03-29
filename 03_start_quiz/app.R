@@ -5,29 +5,60 @@ library(shinysurveys)
 library(dplyr)
 library(rdrop2)
 
-run_locally <- TRUE # FALSE uses Dropbox
+DROPBOX <- FALSE # TRUE uses Dropbox, FALSE saves files locally
 
-inputDir <- "questions_1_teacher" # teachers file!
-outputDir <- "answers_1"
+# load folder names for inputs and outputs
+d <- readRDS("./data/folder_names.rds")
+inputDir <- d$questions_teacher
+outputDir <- d$answers_raw
 
 
 loadTeachersFile <- function(){
     # load and aggregate teachers file
 
-    if(run_locally){
-        localDir <- paste0("../local", inputDir, "/")
-        data <- list.files(path =localDir, pattern = "*.csv", full.names = TRUE, recursive = TRUE) %>%
-            purrr::map(readr::read_csv) %>%
-            bind_rows()
+    if(DROPBOX){
 
-    } else {
-        # Dropbox
         filesInfo <- drop_dir(inputDir)
         filePaths <- filesInfo$path_display
         data <- lapply(filePaths, drop_read_csv, stringsAsFactors = FALSE)
         data <- do.call(rbind, data)
+
+    } else {
+        localDir <- paste0("../", inputDir, "/")
+        data <- list.files(path =localDir, pattern = "*.csv", full.names = TRUE, recursive = TRUE) %>%
+            purrr::map(readr::read_csv) %>%
+            bind_rows()
     }
     data
+}
+
+saveData <- function(data) {
+
+    # Create a unique file name
+    fileName <- sprintf("%s_%s.csv", as.integer(Sys.time()), digest::digest(data))
+
+    if(DROPBOX){
+        # Dropbox
+        # Write the data to a temporary file locally & upload to dropbox
+        filePath <- file.path(tempdir(), fileName)
+
+        write.csv(x = data,
+                  file = filePath,
+                  row.names = FALSE, quote = TRUE)
+
+        drop_upload(filePath, path = outputDir)
+
+    } else {
+
+        # save locally
+        localDir <- paste0("../", outputDir, "/")
+        if(!dir.exists( localDir)) dir.create(localDir)
+
+        write.csv(
+            x = data,
+            file = paste0(localDir, fileName),
+            row.names = FALSE, quote = TRUE)
+    }
 }
 
 df <- loadTeachersFile() # file similar to teachers question file
@@ -46,17 +77,16 @@ server <- function(input, output, session) {
         response_data <- getSurveyData()
 
         # save results as .csv
-        if(run_locally){
-            localDir <- paste0("../local", outputDir, "/")
+        if(DROPBOX){
+            saveData(response_data)
+        } else {
+            localDir <- paste0("../", outputDir, "/")
             if(!dir.exists(localDir)) dir.create(localDir)
             fileName <- sprintf("%s_%s.csv", as.integer(Sys.time()), digest::digest(data))
             write.csv(response_data,
                       file = paste0(localDir, fileName, ".csv"),
                       row.names = FALSE, quote = TRUE)
 
-        } else {
-            # DROPBOX
-            saveData(response_data)
         }
 
         updateActionButton(session, "submit",

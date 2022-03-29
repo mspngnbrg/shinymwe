@@ -7,28 +7,29 @@ library(dplyr)
 library(rdrop2)
 library(ggplot2)
 
-run_locally <- TRUE # FALSE uses Dropbox
+DROPBOX <- FALSE # TRUE uses Dropbox, FALSE saves files locally
 
-# load questions (teachers file)
-inputQ <- "questions_1_teacher"
-inputA <- "answers_1"
+# load folder names for inputs and outputs
+d <- readRDS("./data/folder_names.rds")
+inputQ <- d$questions_teacher
+inputA <- d$answers_raw
 
 loadData <- function(inDir){
 
     # load and aggregate all answers
     inputDir <- inDir
 
-    if(run_locally){
-        localDir <- paste0("../local", inputDir, "/")
-        data <- list.files(path =localDir, pattern = "*.csv", full.names = TRUE, recursive = TRUE) %>%
-            purrr::map(readr::read_csv) %>%
-            bind_rows()
-    } else {
-        # Dropbox
+    if(DROPBOX){
         filesInfo <- drop_dir(inputDir)
         filePaths <- filesInfo$path_display
         data <- lapply(filePaths, drop_read_csv, stringsAsFactors = FALSE)
         data <- do.call(rbind, data)
+
+    } else {
+        localDir <- paste0("../", inputDir, "/")
+        data <- list.files(path =localDir, pattern = "*.csv", full.names = TRUE, recursive = TRUE) %>%
+            purrr::map(readr::read_csv) %>%
+            bind_rows()
     }
     data
 }
@@ -88,7 +89,7 @@ ui <- fluidPage(
     )
 )
 
-## SERVER STARTS HERE
+
 server <- function(input, output) {
 
     output$question_text <-  renderText({
@@ -103,7 +104,7 @@ server <- function(input, output) {
             filter(input_id == input$response)
 
         paste0("1: ", with(x,
-                         option[answer_id == "1"]))
+                           option[answer_id == "1"]))
     })
 
     output$a2_text <-  renderText({
@@ -111,7 +112,7 @@ server <- function(input, output) {
             filter(input_id == input$response)
 
         paste0("2: ", with(x,
-                         option[answer_id == "2"]))
+                           option[answer_id == "2"]))
     })
 
     output$a3_text <-  renderText({
@@ -119,15 +120,8 @@ server <- function(input, output) {
             filter(input_id == input$response)
 
         paste0("3: ", with(x,
-                        option[answer_id == "3"]))
+                           option[answer_id == "3"]))
     })
-
-
-
-
-    #output$a1 <- res$option[answer_id == "1"]
-    #output$a2 <- res$option[answer_id == "2"]
-    #output$a3 <- res$option[answer_id == "3"]
 
     # performance plot
     output$resPlot <- renderPlot({
@@ -143,5 +137,5 @@ server <- function(input, output) {
                  ylab("%"))
     })
 }
-## SERVER ENDS HERE
+
 shinyApp(ui = ui, server = server)

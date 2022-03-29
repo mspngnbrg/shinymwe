@@ -5,42 +5,51 @@
 
 library(shiny)
 library(rdrop2)
+library(dplyr)
+`%>%` <- magrittr::`%>%` # needed is dplyr functions are assessed as :: (slim configuration)
 
-`%>%` <- magrittr::`%>%`
+DROPBOX <- FALSE # TRUE uses Dropbox, FALSE saves files locally
 
-run_locally <- TRUE # FALSE uses Dropbox
+# load folder names for inputs and outputs
+d <- readRDS("./data/folder_names.rds")
+outputDir <-d$questions_raw
 
-outputDir <- "questions_1"
 
-# DANGER AREA! DELETES OLD DATA IF TRUE!
-delete_old_data <- TRUE
-if(delete_old_data) unlink(paste0("../local", outputDir, "/"))
+# CLEAR INPUT FOLDERS FROM OLD FILES? DANGER ZONE!
+remove_old_files <- TRUE # will remove old Q&As if TRUE
+if(DROPBOX){
+    if(drop_exists(d$questions_raw)) drop_delete(d$questions_raw)
+    if(drop_exists(d$answers_raw)) drop_delete(d$answers_raw)
+
+} else {
+    do.call(file.remove, list(list.files(paste0("../", d$questions_raw), full.names = TRUE)))
+    do.call(file.remove, list(list.files(paste0("../", d$answers_raw), full.names = TRUE)))
+}
 
 saveData <- function(data) {
 
     # Create a unique file name
     fileName <- sprintf("%s_%s.csv", as.integer(Sys.time()), digest::digest(data))
 
-    if(run_locally){
+    if(DROPBOX){
+        # Write the data to a temporary file locally & upload to dropbox
+        filePath <- file.path(tempdir(), fileName)
+
+        write.csv(x = data,
+                  file = filePath,
+                  row.names = FALSE, quote = TRUE)
+
+        drop_upload(filePath, path = outputDir)
+
+    } else {
         # save locally
-        localDir <- paste0("../local", outputDir, "/")
+        localDir <- paste0("../", outputDir, "/")
         if(!dir.exists( localDir)) dir.create(localDir)
 
         write.csv(
             x = data,
             file = paste0(localDir, fileName),
             row.names = FALSE, quote = TRUE)
-    } else {
-        # Dropbox
-        # Write the data to a temporary file locally & upload to dropbox
-        filePath <- file.path(tempdir(), fileName)
-
-        write.csv(
-            x = data,
-            file = filePath,
-            row.names = FALSE, quote = TRUE)
-
-        drop_upload(filePath, path = outputDir)
     }
 }
 
