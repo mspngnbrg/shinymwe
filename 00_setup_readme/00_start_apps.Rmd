@@ -3,8 +3,6 @@ title: "Start/publish apps on shiny.io"
 output: html_notebook
 ---
 
-
-
 ```{r}
 # create your own dropbox token if needed (only once)
 # ===================================================

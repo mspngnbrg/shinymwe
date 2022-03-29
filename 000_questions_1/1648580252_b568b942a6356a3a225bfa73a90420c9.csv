@@ -1,0 +1,4 @@
+"question","option","input_type","input_id","dependence","dependence_value","required"
+"Q= qweqwe","A1= we","mc","id",NA,NA,TRUE
+"Q= qweqwe","A2= eg","mc","id",NA,NA,TRUE
+"Q= qweqwe","A3= ggg","mc","id",NA,NA,TRUE

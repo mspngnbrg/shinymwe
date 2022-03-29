@@ -6,9 +6,11 @@
 library(shiny)
 library(rdrop2)
 library(dplyr)
+library(shinyjs)
 `%>%` <- magrittr::`%>%` # needed is dplyr functions are assessed as :: (slim configuration)
 
 DROPBOX <- FALSE # TRUE uses Dropbox, FALSE saves files locally
+n_clicks <- 0
 
 # load folder names for inputs and outputs
 d <- readRDS("./data/folder_names.rds")
@@ -59,35 +61,53 @@ fields <- c("question", paste0("a", 1:3)) # modify if 4 answers are needed
 # Shiny app with 3 fields that the user can submit data for
 shinyApp(
     ui = fluidPage(
+        helpText("In the future, the submit button will be blocked until a new question is entered. This is not possible if run locally, apparently."),
         DT::dataTableOutput("responses", width = 300), tags$hr(),
         textInput("question", "Question", ""),
         textInput("a1", "Answer 1", ""),
         textInput("a2", "Answer 2", ""),
         textInput("a3", "Answer 3", ""), # modify if 4 answers are needed
-        actionButton("submit", "Submit, all answers MUST differ!"),
-        textOutput("Please click")
+        actionButton("submit", "Submit"),
+        textOutput("n_clicks")
     ),
     server = function(input, output, session) {
-
         # Whenever a field is filled, aggregate all form data
         formData <- reactive({
             data <- sapply(fields, function(x) input[[x]])
             # TODO: check that no answers are doublettes
-            tibble <- tibble::tibble(question = data[1],
-                                     option = data[2:4],
+            tibble <- tibble::tibble(question = paste0("Q= ", data[1]),
+                                     option = paste0("A", 1:3, "= ", data[2:4]),
                                      input_type = "mc",
                                      input_id = "id",
                                      dependence = NA,
                                      dependence_value = NA,
                                      required = TRUE) # modify if 4 answers are needed
-            data <- tibble %>% mutate(across(everything(), as.character)) # numbers in text fields will crash otherwise
+            #data <- tibble %>% mutate(across(everything(), as.character)) # numbers in text fields will crash otherwise
+        })
+        #  rv2 <- reactiveValues()
+        # rv2 <- 0
+        # observe({
+        #     toggleState(id = "submit", condition = TRUE)
+        #     })
+        # observeEvent(input$question, {
+        #     rv2 <- 1
+        # })
+
+        # observe(shinyjs::toggleState("submit"))
+
+        output$n_clicks <- renderText({
+            paste(rv$a, " answers submitted.")
         })
 
         # When the Submit button is clicked, save the form data
+        rv <- reactiveValues()
+        rv$a <- 0
         observeEvent(input$submit, {
             saveData(formData())
-            updateActionButton(session, "submit",
-                               label = "Thanks! Submit another one? ")
+            rv$a <- rv$a + 1
+            # rv$b <- 1
+            updateActionButton(session, "submit", label = "Thanks! Submit another question?")
+
         })
     }
 )
