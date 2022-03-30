@@ -62,12 +62,15 @@ fields <- c("question", paste0("a", 1:3)) # modify if 4 answers are needed
 # Shiny app with 3 fields that the user can submit data for
 shinyApp(
     ui = fluidPage(
+        useShinyjs(),
         helpText("In the future, the submit button will be blocked until a new question is entered. This is not possible if run locally, apparently."),
         DT::dataTableOutput("responses", width = 300), tags$hr(),
+        div(id = "form",
         textInput("question", "Question", ""),
         textInput("a1", "Answer 1", ""),
         textInput("a2", "Answer 2", ""),
-        textInput("a3", "Answer 3", ""), # modify if 4 answers are needed
+        textInput("a3", "Answer 3", "") # modify if 4 answers are needed
+        ),
         actionButton("submit", "Submit"),
         textOutput("n_clicks")
     ),
@@ -85,19 +88,6 @@ shinyApp(
                                      required = TRUE) # modify if 4 answers are needed
 
         })
-        # Submit button only active if new question in entered
-          rv2 <- reactiveValues()
-         rv2 <- 0
-         observe({
-             toggleState(id = "submit",
-                         condition = FALSE, asis = TRUE)
-             })
-
-         observeEvent(input$question, {
-             rv2 <- 1
-         })
-
-        # observe(shinyjs::toggleState("submit"))
 
         output$n_clicks <- renderText({
             paste(rv$a, " answers submitted.")
@@ -110,9 +100,8 @@ shinyApp(
         observeEvent(input$submit, {
             saveData(formData())
             rv$a <- rv$a + 1
-            # rv$b <- 1
+            shinyjs::reset("form")
             updateActionButton(session, "submit", label = "Thanks! Submit another question?")
-
         })
     }
 )
