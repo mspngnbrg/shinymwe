@@ -4,10 +4,15 @@ output: html_notebook
 ---
 
 ```{r}
+
+# 1. to be on the safe side, delete .httr-oauth file in 00_setup_readme folder
+drop_auth_file <- ".httr-oauth"
+if(file.exists(drop_auth_file ))file.remove(drop_auth_file )
+
 # create your own dropbox token if needed (only once)
 # ===================================================
 library(rdrop2)
-drop_auth()
+drop_auth() # opens website for dropbox PW 
 
 # copy .httr-auth into all app folders
 folder_names <- c("../01_collect_questions", "../02_question_curation", 
@@ -18,12 +23,14 @@ for(INDEX in 1:length(folder_names)) {
             folder_names[INDEX], overwrite = TRUE)
 }
 
+# DROPBOX vs locally? & folder names
 # define input and output folders for the whole project 
 # and copy this file into each app folder 
 # =====================================================
-d <- data.frame(questions_raw = "000_questions_1",
-                questions_teacher = "000_teacher_1",
-                answers_raw = "000_answers_1")
+d <- data.frame(questions_raw = "05_questions_1",
+                questions_teacher = "05_teacher_1",
+                answers_raw = "05_answers_1",
+                dropbox = FALSE)
 saveRDS(d, "folder_names.rds")
 
 for(INDEX in 1:length(folder_names)) {
@@ -35,9 +42,19 @@ file.copy(list.files(getwd(), "folder_names.rds", all.files = TRUE), temp_folder
 # start one app from this script by removing "#" (or select all text after "#" and hit "Enter") 
 
 # rsconnect::deployApp('../01_collect_questions/', account = "mspangenberg")
-# rsconnect::deployApp('02_question_curation/', account = "mspangenberg")
-# rsconnect::deployApp('03_start_quiz/', account = "mspangenberg")
-# rsconnect::deployApp('04_show_results/', account = "mspangenberg")
-# rsconnect::deployApp('blaa/', account = "mspangenberg")
+# rsconnect::deployApp('../02_question_curation/', account = "mspangenberg")
+# rsconnect::deployApp('../03_start_quiz/', account = "mspangenberg")
+# rsconnect::deployApp('../04_show_results/', account = "mspangenberg")
+
+# IF APPS WERE DELETED ON SHINYAPPS.IO MANUALLY:
+
+#Preparing to deploy application...Error: HTTP 404
+#GET https://api.shinyapps.io/v1/applications/5962207
+#Not Found
+
+# rsconnect::forgetDeployment("../01_collect_questions")
+# rsconnect::forgetDeployment("../02_question_curation")
+# rsconnect::forgetDeployment("../03_start_quiz")
+# rsconnect::forgetDeployment("../04_show_results")
 ```
 

@@ -7,12 +7,11 @@ library(dplyr)
 library(rdrop2)
 library(ggplot2)
 
-DROPBOX <- FALSE # TRUE uses Dropbox, FALSE saves files locally
-
 # load folder names for inputs and outputs
 d <- readRDS("./data/folder_names.rds")
 inputQ <- d$questions_teacher
 inputA <- d$answers_raw
+(DROPBOX <- d$dropbox) # TRUE uses Dropbox, FALSE saves files locally
 
 loadData <- function(inDir){
 

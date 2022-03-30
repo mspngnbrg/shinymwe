@@ -5,13 +5,12 @@ library(shinysurveys)
 library(dplyr)
 library(rdrop2)
 
-DROPBOX <- FALSE # TRUE uses Dropbox, FALSE saves files locally
 
 # load folder names for inputs and outputs
 d <- readRDS("./data/folder_names.rds")
 inputDir <- d$questions_teacher
 outputDir <- d$answers_raw
-
+(DROPBOX <- d$dropbox) # TRUE uses Dropbox, FALSE saves files locally
 
 loadTeachersFile <- function(){
     # load and aggregate teachers file

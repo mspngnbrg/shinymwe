@@ -9,12 +9,13 @@ library(dplyr)
 library(shinyjs)
 `%>%` <- magrittr::`%>%` # needed is dplyr functions are assessed as :: (slim configuration)
 
-DROPBOX <- FALSE # TRUE uses Dropbox, FALSE saves files locally
+
 n_clicks <- 0
 
 # load folder names for inputs and outputs
 d <- readRDS("./data/folder_names.rds")
 outputDir <-d$questions_raw
+(DROPBOX <- d$dropbox) # TRUE uses Dropbox, FALSE saves files locally
 
 
 # CLEAR INPUT FOLDERS FROM OLD FILES? DANGER ZONE!
@@ -82,16 +83,19 @@ shinyApp(
                                      dependence = NA,
                                      dependence_value = NA,
                                      required = TRUE) # modify if 4 answers are needed
-            #data <- tibble %>% mutate(across(everything(), as.character)) # numbers in text fields will crash otherwise
+
         })
-        #  rv2 <- reactiveValues()
-        # rv2 <- 0
-        # observe({
-        #     toggleState(id = "submit", condition = TRUE)
-        #     })
-        # observeEvent(input$question, {
-        #     rv2 <- 1
-        # })
+        # Submit button only active if new question in entered
+          rv2 <- reactiveValues()
+         rv2 <- 0
+         observe({
+             toggleState(id = "submit",
+                         condition = FALSE, asis = TRUE)
+             })
+
+         observeEvent(input$question, {
+             rv2 <- 1
+         })
 
         # observe(shinyjs::toggleState("submit"))
 
@@ -99,7 +103,8 @@ shinyApp(
             paste(rv$a, " answers submitted.")
         })
 
-        # When the Submit button is clicked, save the form data
+        # When the Submit button is clicked, save the form data & change
+        # number in text below button
         rv <- reactiveValues()
         rv$a <- 0
         observeEvent(input$submit, {
