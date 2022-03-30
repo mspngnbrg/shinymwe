@@ -90,7 +90,7 @@ shinyApp(
         })
 
         output$n_clicks <- renderText({
-            paste(rv$a, " answers submitted.")
+            paste(rv$a, " questions submitted.")
         })
 
         # When the Submit button is clicked, save the form data & change

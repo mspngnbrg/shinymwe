@@ -4,42 +4,49 @@ output: html_notebook
 ---
 
 ```{r}
+dropbox <- FALSE
 
-# 1. to be on the safe side, delete .httr-oauth file in 00_setup_readme folder
-drop_auth_file <- ".httr-oauth"
-if(file.exists(drop_auth_file ))file.remove(drop_auth_file )
-
-# create your own dropbox token if needed (only once)
-# ===================================================
-library(rdrop2)
-drop_auth() # opens website for dropbox PW 
-
-# copy .httr-auth into all app folders
+# App folder names (do NOT change!)
 folder_names <- c("../01_collect_questions", "../02_question_curation", 
                   "../03_start_quiz", "../04_show_results")
+
+# 1. CONNECT TO DROPBOX
+# =====================
+# Skip to 2. if you want to test locally
+dropbox <- TRUE # only if you have DROPBOX access!
+# to be on the safe side, delete .httr-oauth file in 00_setup_readme folder
+drop_auth_file <- ".httr-oauth" # dropbox authentication key
+if(file.exists(drop_auth_file ))file.remove(drop_auth_file )
+
+library(rdrop2)
+drop_auth() # opens website for dropbox PW 
 
 for(INDEX in 1:length(folder_names)) {
   file.copy(list.files(getwd(), ".httr-oauth", all.files = TRUE), 
             folder_names[INDEX], overwrite = TRUE)
 }
 
-# DROPBOX vs locally? & folder names
-# define input and output folders for the whole project 
-# and copy this file into each app folder 
-# =====================================================
+# 2. Folder names
+# ================
+# here student Q&As, a teacher summary and quiz answers are stored
+
 d <- data.frame(questions_raw = "05_questions_1",
                 questions_teacher = "05_teacher_1",
                 answers_raw = "05_answers_1",
-                dropbox = FALSE)
+                dropbox = dropbox) # use DROPBOX or save files locally
 saveRDS(d, "folder_names.rds")
 
+# copy d into each app folder
 for(INDEX in 1:length(folder_names)) {
   temp_folder_name <- paste0(folder_names[INDEX], "/data")
   if(!dir.exists(temp_folder_name)) dir.create(temp_folder_name)
 file.copy(list.files(getwd(), "folder_names.rds", all.files = TRUE), temp_folder_name , overwrite = TRUE) 
 }
 
-# start one app from this script by removing "#" (or select all text after "#" and hit "Enter") 
+# 3. launch app:
+# ==============
+# If you want to upload apps to shinyapps.io, uncomment one line and run it
+# If you want to test locally, go to app folders (01_ ... etc), open app.R and click "Run app" on top of script
 
 # rsconnect::deployApp('../01_collect_questions/', account = "mspangenberg")
 # rsconnect::deployApp('../02_question_curation/', account = "mspangenberg")
