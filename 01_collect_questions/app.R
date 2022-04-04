@@ -9,7 +9,10 @@ ui <- fluidPage(
     useShinyjs(),
     navbarPage("Navbar",
                tabPanel("Questions",
-                        helpText("Please enter one question and four answers. Mark correct answer(s) by clicking the check box below. Question is mandatory, not all answer fields must be filled."),
+                        helpText("Please enter one question and four answers.
+                                 Mark correct answer(s) by clicking the check
+                                 box below. The question is mandatory, but not all
+                                 answer fields must be filled."),
 
                         mainPanel(
                             div(id = "form",
@@ -25,7 +28,6 @@ ui <- fluidPage(
                             ),
 
                             actionButton("submit", "Submit"),
-
                         )
                ),
                tabPanel("Download questions",
@@ -33,7 +35,7 @@ ui <- fluidPage(
                             helpText("Here you can download all questions and answers in a suitable format for the quiz."),
                             downloadButton("downloadData", "Download"),
                             helpText("To delete all old Q&A sets, type the pw into the text field. This will be a teacher-only function in the future"),
-                            helpText("pw is -I know it!- without he minus signs, only here for testing..."),
+                            helpText("Pass phrase: I know it! (including the !). Please copy and paste into the text form below."),
                             textInput("passphrase", "Pass phrase", ""),
                             actionButton("deleteOldAnswers", "Delete old answers")
                         )

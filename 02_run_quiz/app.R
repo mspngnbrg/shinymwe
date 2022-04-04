@@ -33,6 +33,7 @@ votes_per_option <- function(quiz_answers, question_df, question_ID){
 ui <- navbarPage("Navbar",
                  tabPanel("Quiz",
                           mainPanel(
+                              textOutput("no_quiz_file"),
                               uiOutput("quiztime"),
                               tableOutput("quiz_answers")
                           )
@@ -63,6 +64,10 @@ ui <- navbarPage("Navbar",
 server <- function(input, output, session) {
 
     questions <- reactiveValues(df = NULL)
+
+    output$no_quiz_file <- renderText({
+            if(is.null(input$questions_csv))"Please upload questions."
+    })
 
     output$quiztime <- renderUI({
         req(input$questions_csv)
@@ -100,29 +105,30 @@ server <- function(input, output, session) {
     output$select_question_id <- renderUI({
         var <- rv$answers[["question_id"]]
         lvl <- as.factor(var)
-        selectInput("var", "choose variable:", choices= lvl)
+        selectInput("var", "Choose answer:", choices= lvl)
     })
 
     # display Q&A set above barplot
      output$table_test <- renderTable({
             req(input$var)
             txt <- votes_per_option(rv$answers, questions$df, input$var)
-            data.frame("Question" = c(paste0("Q:", txt$question[1]),paste0("A ", 1:3, ": ", txt$option[1:3])))
+            data.frame("Question" = c(paste0(txt$question[1]), txt$option[1:4]))
         })
 
-    #plot solutions (barplot)
+    # plot solutions (barplot)
     output$answer_plot <- renderPlot({
 
         req(input$var)
 
         df <- votes_per_option(rv$answers, questions$df, input$var)
 
-        plot(ggplot(df, aes(x = option, y = counts, fill = option_is_true))+
+        plot(ggplot(df, aes(x = substr(option, 1, 2), y = counts, fill = option_is_true))+
                  geom_bar(stat = "identity")+
                  scale_x_discrete(drop = FALSE)+
                  theme_classic(base_size = 16)+
-                 #ylim(0, 100)+
-                 ylab("counts"))
+                 scale_fill_manual(values=c("FALSE"="black","TRUE"="green"), name = "Correctness")+
+                 ylab("Votes")+
+                 xlab("Answer"))
     })
 
 }
