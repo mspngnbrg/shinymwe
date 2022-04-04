@@ -8,6 +8,7 @@ After the quiz, the quiz may be evaluated immediately.
 #  Why the project is useful
 This project aims to facilitate the recap process described above by a re-combination of available shiny based tools (shiny, shinyjs, shinysurveys, ...  ) and software. 
 We aim to standardize and automate the recap process as much as possible. 
+This may reduce the tedious steps of question collection, data formatting, ... to only a few clicks for the teacher. 
 
 # How users can get started with the project
 A full implementation requires teachers to have RStudio and the possibility to launch a shiny app (e.g. on shinyapps.io with a free plan). 
